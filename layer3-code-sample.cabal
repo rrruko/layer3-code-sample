@@ -9,7 +9,7 @@ maintainer:          joneetha@oregonstate.edu
 extra-source-files:  CHANGELOG.md
 
 library
-  exposed-modules:     BinaryTree
+  exposed-modules:     BinaryTree, Ipv4
   build-depends:       base ^>=4.12.0.0
   hs-source-dirs:      src
   default-language:    Haskell2010
