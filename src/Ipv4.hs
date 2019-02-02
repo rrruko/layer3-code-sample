@@ -1,6 +1,3 @@
-{-# language DeriveFunctor #-}
-{-# language TypeApplications #-}
-
 module Ipv4 (possibleAddresses) where
 
 import Control.Monad (guard)
