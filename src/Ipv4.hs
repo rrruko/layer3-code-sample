@@ -34,18 +34,14 @@ toWord8 n
     | n >= 0 && n < 256 = Just (fromIntegral n)
     | otherwise = Nothing
 
-data Options a b = Options { getOptions :: [(a, b)] }
-    deriving (Functor, Show)
-
-newtype Fix f = Fix { unFix :: f (Fix f) }
-
-type ParseTree = Fix (Options Word8)
+data ParseTree = ParseTree { getParseTree :: [(Word8, ParseTree)] }
+    deriving (Show)
 
 parseTree :: String -> ParseTree
-parseTree str = Fix (Options (map (fmap parseTree) (parseOctets str)))
+parseTree str = ParseTree (map (fmap parseTree) (parseOctets str))
 
 flatten :: ParseTree -> [[Word8]]
-flatten (Fix (Options [])) = [[]]
-flatten (Fix options) =
-    let xss = fmap flatten options
-    in  getOptions xss >>= (\(n, ips) -> map (n:) ips)
+flatten (ParseTree []) = [[]]
+flatten (ParseTree tree) = do
+    (octet, ips) <- map (fmap flatten) tree
+    map (octet:) ips
