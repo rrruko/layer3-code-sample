@@ -1,7 +1,7 @@
 module Ipv4 (possibleAddresses) where
 
 import Control.Monad (guard)
-import Data.List (isPrefixOf, nub, uncons)
+import Data.List (isPrefixOf, nub)
 import Data.Maybe (mapMaybe)
 import Data.Word (Word8)
 import Text.Read (readMaybe)
@@ -16,15 +16,15 @@ possibleAddresses = mapMaybe toIpv4 . flatten . parseTree
         toIpv4 _         = Nothing
 
 parseOctets :: String -> [(Word8, String)]
-parseOctets str = nub $ mapMaybe (readDigits str) [1, 2, 3]
+parseOctets str = nub $ mapMaybe readDigits [1, 2, 3]
     where
-        readDigits str n = do
+        readDigits n = do
             let (prefix, suffix) = splitAt n str
-            n <- readValidOctet prefix
-            fmap (\x -> (x, suffix)) (toWord8 n)
-        readValidOctet str = do
-            guard (not ("0" `isPrefixOf` str) || str == "0")
-            readMaybe str
+            octet <- readValidOctet prefix
+            fmap (\x -> (x, suffix)) (toWord8 octet)
+        readValidOctet octetString = do
+            guard (not ("0" `isPrefixOf` octetString) || octetString == "0")
+            readMaybe octetString
 
 toWord8 :: Int -> Maybe Word8
 toWord8 n
