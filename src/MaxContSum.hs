@@ -1,19 +1,22 @@
 module MaxContSum (maxContSum) where
 
-import Data.List.NonEmpty (NonEmpty(..), (<|))
-import qualified Data.List.NonEmpty as NonEmpty
-
-maximalSubsequences :: Foldable f => f Integer -> [NonEmpty Integer]
-maximalSubsequences = groupBy (\x y -> x > 0 && y > 0)
+import Control.Monad ((<=<))
+import Data.List.NonEmpty (NonEmpty(..), (<|), uncons)
 
 maxContSum :: NonEmpty Integer -> Integer
-maxContSum = maximum . map sum . maximalSubsequences
+maxContSum = maximum . fmap sum . contiguousSubsequences
 
--- Could just use NonEmpty.groupBy, but that felt like cheating
-groupBy :: Foldable f => (a -> a -> Bool) -> f a -> [NonEmpty a]
-groupBy equals = foldr addToSubsequence []
-    where
-        addToSubsequence element [] = [pure element]
-        addToSubsequence element acc@(x:xs)
-            | element `equals` NonEmpty.head x = (element <| x):xs
-            | otherwise = pure element:acc
+contiguousSubsequences :: NonEmpty a -> NonEmpty (NonEmpty a)
+contiguousSubsequences = inits <=< tails
+
+inits :: NonEmpty a -> NonEmpty (NonEmpty a)
+inits xs =
+    case uncons xs of
+        (x, Nothing) -> pure (pure x)
+        (x, Just rest) -> pure x <| fmap (x<|) (inits rest)
+
+tails :: NonEmpty a -> NonEmpty (NonEmpty a)
+tails xs =
+    case uncons xs of
+        (x, Nothing) -> pure (pure x)
+        (_, Just rest) -> pure xs <> tails rest
